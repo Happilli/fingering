@@ -12,6 +12,7 @@ dependencies = [
 ]
 
 sources = [
+  'extruded_text.c',
   'fingering.c',
 ]
 
