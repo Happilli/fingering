@@ -1,0 +1,21 @@
+# meson build output
+builddir/
+build/
+
+# compiled binaries / objects
+*.o
+*.a
+*.so
+*.out
+
+# editor/IDE cruft
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS cruft
+.DS_Store
+
+# raylib source build artifacts 
+raylib/build/
