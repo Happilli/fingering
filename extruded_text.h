@@ -1,5 +1,6 @@
 #ifndef EXTRUDED_TEXT_H
 #define EXTRUDED_TEXT_H
+#define MAX_TEXT_LENGTH 120
 
 #include "raylib.h"
 
@@ -15,8 +16,14 @@ typedef struct ExtrudedText {
   int textLength;
   int fontSize;
   float fontSpacing;
+  float extraSeperation;
   int texW;
   int texH;
+
+  float totalWidth;
+  float currentScrollX;
+  float targetScrollX;
+  float letterPositions[MAX_TEXT_LENGTH];
 
 } ExtrudedText;
 

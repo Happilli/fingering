@@ -3,46 +3,53 @@
 ExtrudedText InitExtrudedText(Font font, const char *text, float baseWidth) {
   ExtrudedText exText = {0};
 
-  Vector2 textSize = MeasureTextEx(font, text, 40.0f, 4.0f);
-  int texW = (int)textSize.x + 40;
-  int texH = (int)textSize.y + 40;
+  exText.texW = 2040;
+  exText.texH = 200;
 
-  exText.buffer = LoadRenderTexture(texW, texH);
+  exText.buffer = LoadRenderTexture(exText.texW, exText.texH);
 
-  BeginTextureMode(exText.buffer);
-  ClearBackground(BLANK);
-  Vector2 textPos = {(texW - textSize.x) / 2.0f, (texH - textSize.y) / 2.0f};
-  DrawTextEx(font, text, textPos, 40.0f, 4.0f, BLUE);
-  EndTextureMode();
+  exText.sourceRec =
+      (Rectangle){0.0f, 0.0f, (float)exText.texW, -(float)exText.texH};
+  float aspect = (float)exText.texH / (float)exText.texW;
 
-  exText.sourceRec = (Rectangle){0.0f, 0.0f, (float)texW, -(float)texH};
-  float aspect = (float)texW / (float)texH;
-
-  exText.billboardSize = (Vector2){baseWidth, baseWidth / aspect};
+  exText.billboardSize = (Vector2){baseWidth, baseWidth * aspect};
   exText.thicknessLayers = 40;
   exText.stepZ = 0.015f;
+  exText.targetScrollX = 0.0f;
+  exText.currentScrollX = 0.0f;
 
   exText.font = font;
   exText.text = text;
   exText.textLength = TextLength(text);
-  exText.fontSize = 40;
+  exText.fontSize = 120;
   exText.fontSpacing = 2.0;
-  exText.texW = texW;
-  exText.texH = texH;
+  exText.extraSeperation = 12.3f;
 
+  float currentx = 0.0;
+
+  for (int i = 0; i < exText.textLength; i++) {
+    exText.letterPositions[i] = currentx;
+    char ch[2] = {text[i], '\0'};
+    Vector2 size = MeasureTextEx(font, ch, exText.fontSize, exText.fontSpacing);
+
+    currentx += size.x + exText.extraSeperation;
+  }
+
+  UpdatedExtrudedTextColor(&exText, false, 0);
   return exText;
 }
 
 void UpdatedExtrudedTextColor(ExtrudedText *exT, bool hasError, int typeCount) {
+  if (typeCount < exT->textLength) {
+    exT->targetScrollX = exT->letterPositions[typeCount];
+  } else {
+    exT->targetScrollX = exT->totalWidth;
+  }
+  exT->currentScrollX += (exT->targetScrollX - exT->currentScrollX) * 0.14f;
+
   BeginTextureMode(exT->buffer);
   ClearBackground(BLANK);
-  float startX =
-      (exT->texW -
-       MeasureTextEx(exT->font, exT->text, exT->fontSize, exT->fontSpacing).x) /
-      2.0;
-  float startY = (exT->texH - exT->fontSize) / 2.0;
-  float currentx = 0.0;
-
+  int centerAnchorX = exT->texW / 2;
   for (int i = 0; i < exT->textLength; i++) {
     char ch[2] = {exT->text[i], '\0'};
     Color color = WHITE;
@@ -52,12 +59,10 @@ void UpdatedExtrudedTextColor(ExtrudedText *exT, bool hasError, int typeCount) {
       color = RED;
     }
 
-    Vector2 pos = {startX + currentx, startY};
+    float offsetDrawx =
+        (float)centerAnchorX + exT->letterPositions[i] - exT->currentScrollX;
+    Vector2 pos = {offsetDrawx, 69.9};
     DrawTextEx(exT->font, ch, pos, exT->fontSize, exT->fontSpacing, color);
-    Vector2 size =
-        MeasureTextEx(exT->font, ch, exT->fontSize, exT->fontSpacing);
-
-    currentx += size.x + exT->fontSpacing;
   }
   EndTextureMode();
 }
