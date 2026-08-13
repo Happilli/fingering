@@ -9,10 +9,20 @@ typedef struct ExtrudedText {
   Vector2 billboardSize;
   int thicknessLayers;
   float stepZ;
+
+  Font font;
+  const char *text;
+  int textLength;
+  int fontSize;
+  float fontSpacing;
+  int texW;
+  int texH;
+
 } ExtrudedText;
 
 ExtrudedText InitExtrudedText(Font font, const char *text, float baseWidth);
 void DrawExtrudedText3D(Camera3D camera, ExtrudedText exText, Vector3 position);
+void UpdatedExtrudedTextColor(ExtrudedText *exT, bool hasError, int typeCount);
 void UnloadExtrudedText(ExtrudedText exText);
 
 #endif

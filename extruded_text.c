@@ -22,7 +22,44 @@ ExtrudedText InitExtrudedText(Font font, const char *text, float baseWidth) {
   exText.thicknessLayers = 40;
   exText.stepZ = 0.015f;
 
+  exText.font = font;
+  exText.text = text;
+  exText.textLength = TextLength(text);
+  exText.fontSize = 40;
+  exText.fontSpacing = 2.0;
+  exText.texW = texW;
+  exText.texH = texH;
+
   return exText;
+}
+
+void UpdatedExtrudedTextColor(ExtrudedText *exT, bool hasError, int typeCount) {
+  BeginTextureMode(exT->buffer);
+  ClearBackground(BLANK);
+  float startX =
+      (exT->texW -
+       MeasureTextEx(exT->font, exT->text, exT->fontSize, exT->fontSpacing).x) /
+      2.0;
+  float startY = (exT->texH - exT->fontSize) / 2.0;
+  float currentx = 0.0;
+
+  for (int i = 0; i < exT->textLength; i++) {
+    char ch[2] = {exT->text[i], '\0'};
+    Color color = WHITE;
+    if (i < typeCount) {
+      color = GREEN;
+    } else if (hasError && i == typeCount) {
+      color = RED;
+    }
+
+    Vector2 pos = {startX + currentx, startY};
+    DrawTextEx(exT->font, ch, pos, exT->fontSize, exT->fontSpacing, color);
+    Vector2 size =
+        MeasureTextEx(exT->font, ch, exT->fontSize, exT->fontSpacing);
+
+    currentx += size.x + exT->fontSpacing;
+  }
+  EndTextureMode();
 }
 
 void DrawExtrudedText3D(Camera3D camera, ExtrudedText exText,
