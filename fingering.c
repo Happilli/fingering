@@ -21,7 +21,16 @@ int main(void) {
 
   int typeCount = 0;
   bool hasError = false;
+
+  double startTime = 0.0;
+  bool started = false;
+  float wpm = 0.0f;
+
   while (!WindowShouldClose()) {
+    if (!started) {
+      startTime = GetTime();
+      started = !started;
+    }
     int key = GetCharPressed();
     while (key > 0) {
       if (!hasError && typeCount < tx.textLength) {
@@ -32,6 +41,10 @@ int main(void) {
         }
       }
       key = GetCharPressed();
+    }
+    if (started && typeCount > 0 && typeCount < tx.textLength) {
+      double elapsedMin = (GetTime() - startTime) / 60.0;
+      wpm = (typeCount / 5.0) / elapsedMin;
     }
     if (IsKeyPressed(KEY_BACKSPACE)) {
       if (hasError) {
@@ -45,8 +58,9 @@ int main(void) {
     ClearBackground(RAYWHITE);
     BeginMode3D(camera);
     DrawExtrudedText3D(camera, tx, pos);
-    DrawGrid(120, 1.0);
+    // DrawGrid(120, 1.0);
     EndMode3D();
+    DrawText(TextFormat("WPM: %.1f", wpm), 20, 0, 50, BLACK);
     EndDrawing();
   }
   UnloadFont(font);

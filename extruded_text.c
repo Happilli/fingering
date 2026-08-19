@@ -34,7 +34,7 @@ ExtrudedText InitExtrudedText(Font font, const char *text, float baseWidth) {
 
     currentx += size.x + exText.extraSeperation;
   }
-
+  exText.totalWidth = currentx;
   UpdatedExtrudedTextColor(&exText, false, 0);
   return exText;
 }
