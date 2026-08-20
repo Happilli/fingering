@@ -14,6 +14,7 @@ dependencies = [
 sources = [
   'extruded_text.c',
   'fingering.c',
+  'wordlist.c',
 ]
 
 exe = executable(

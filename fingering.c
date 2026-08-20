@@ -1,8 +1,11 @@
 #include "./extruded_text.h"
+#include "./wordlist.h"
 #include "raylib.h"
 #include <stddef.h>
+#include <string.h>
 
 int main(void) {
+  SetTraceLogLevel(LOG_WARNING);
   InitWindow(0, 0, "fingering");
   int monitor = GetCurrentMonitor();
   SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
@@ -14,8 +17,14 @@ int main(void) {
                      .projection = CAMERA_PERSPECTIVE};
 
   Font font = LoadFontEx("./resources/Font/PressStart2P.ttf", 100, NULL, 0);
-  ExtrudedText tx = InitExtrudedText(
-      font, "The quick brown hand fingers over the Membrane keyboard..", 44.4);
+
+  WordList wl = LoadWordList("./resources/WordList/english200.txt");
+  char sentence[500] = {0};
+  for (int i = 0; i < 10; i++) {
+    strcat(sentence, GetRandomWords(&wl));
+    strcat(sentence, " ");
+  }
+  ExtrudedText tx = InitExtrudedText(font, sentence, 44.4);
 
   Vector3 pos = {0.0, 0.0, 0.0};
 
