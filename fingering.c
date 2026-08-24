@@ -30,9 +30,13 @@ int main(void) {
 
   int typeCount = 0;
   bool hasError = false;
+  int totalKeyStrokes = 0;
+  int totalErrors = 0;
 
   double startTime = 0.0;
+  double endTime = 0.0;
   bool started = false;
+  bool finished = false;
   float wpm = 0.0f;
 
   while (!WindowShouldClose()) {
@@ -47,10 +51,20 @@ int main(void) {
           typeCount++;
         } else {
           hasError = true;
+          totalErrors += 1;
         }
       }
       key = GetCharPressed();
+      totalKeyStrokes += 1;
     }
+
+    if (!finished && typeCount == tx.textLength) {
+      finished = true;
+      endTime = GetTime();
+      double elapsedMin = (endTime - startTime) / 60.0;
+      wpm = (typeCount / 5.0) / elapsedMin;
+    }
+
     if (started && typeCount > 0 && typeCount < tx.textLength) {
       double elapsedMin = (GetTime() - startTime) / 60.0;
       wpm = (typeCount / 5.0) / elapsedMin;
@@ -62,14 +76,41 @@ int main(void) {
         typeCount--;
       }
     }
+    if (finished && IsKeyPressed(KEY_R)) {
+      UnloadExtrudedText(tx);
+      memset(sentence, 0, sizeof(sentence));
+      for (int i = 0; i < 10; i++) {
+        strcat(sentence, GetRandomWords(&wl));
+        strcat(sentence, " ");
+      }
+      tx = InitExtrudedText(font, sentence, 44.4);
+
+      typeCount = 0;
+      hasError = false;
+      totalKeyStrokes = 0;
+      totalErrors = 0;
+      startTime = 0.0;
+      endTime = 0.0;
+      started = false;
+      finished = false;
+      wpm = 0.0f;
+    }
     UpdatedExtrudedTextColor(&tx, hasError, typeCount);
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    BeginMode3D(camera);
-    DrawExtrudedText3D(camera, tx, pos);
-    // DrawGrid(120, 1.0);
-    EndMode3D();
-    DrawText(TextFormat("WPM: %.1f", wpm), 20, 0, 50, BLACK);
+    if (!finished) {
+      BeginMode3D(camera);
+      DrawExtrudedText3D(camera, tx, pos);
+      // DrawGrid(120, 1.0);
+      EndMode3D();
+      DrawText(TextFormat("WPM: %.1f", wpm), 20, 0, 50, BLACK);
+    } else {
+      float accuracy =
+          100.0 * (totalKeyStrokes - totalErrors) / totalKeyStrokes;
+      DrawText(TextFormat("WPM: %.1f", wpm), 100, 100, 50, BLACK);
+      DrawText(TextFormat("ACCURACY: %.1f", accuracy), 100, 140, 50, BLACK);
+      DrawText(TextFormat("Press R to restart"), 100, 180, 50, BLACK);
+    }
     EndDrawing();
   }
   UnloadFont(font);
